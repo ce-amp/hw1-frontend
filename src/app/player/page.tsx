@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -14,12 +17,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
+import { useAuth } from "@/components/auth-provider";
+
+const difficultyMap = {
+  easy: 1,
+  medium: 3,
+  hard: 5,
+};
 
 export default function PlayerDashboard() {
+  const [difficulty, setDifficulty] = useState<string>("medium");
+  const router = useRouter();
+  const { token } = useAuth();
+
+  const handleStartGame = () => {
+    router.push(
+      `/player/questions?difficulty=${
+        difficultyMap[difficulty as keyof typeof difficultyMap]
+      }`
+    );
+  };
+
+  const handleStartRandomQuiz = () => {
+    router.push("/player/questions?mode=random");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">داشبورد بازیکن</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>پاسخ به سوالات</CardTitle>
@@ -28,21 +55,34 @@ export default function PlayerDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Select defaultValue="medium">
+            <Select value={difficulty} onValueChange={setDifficulty}>
               <SelectTrigger className="w-full mb-4">
                 <SelectValue placeholder="انتخاب حالت بازی" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="easy">آسان</SelectItem>
-                <SelectItem value="medium">متوسط</SelectItem>
-                <SelectItem value="hard">سخت</SelectItem>
+                <SelectItem value="easy">آسان (سطح ۱)</SelectItem>
+                <SelectItem value="medium">متوسط (سطح ۳)</SelectItem>
+                <SelectItem value="hard">سخت (سطح ۵)</SelectItem>
               </SelectContent>
             </Select>
-            <Link href="/player/questions">
-              <Button className="w-full">شروع بازی</Button>
-            </Link>
+            <Button className="w-full" onClick={handleStartGame}>
+              شروع بازی
+            </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>کوییز تصادفی</CardTitle>
+            <CardDescription>پاسخ به سوالات تصادفی از همه سطوح</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button className="w-full" onClick={handleStartRandomQuiz}>
+              شروع کوییز تصادفی
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>جدول امتیازات</CardTitle>

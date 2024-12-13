@@ -34,12 +34,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-    if (storedToken) {
+    if (storedToken && !user) {
       loadUserProfile(storedToken);
     } else {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const loadUserProfile = async (authToken: string) => {
     try {

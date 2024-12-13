@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { apiClient } from "@/lib/api-client";
 import {
   Card,
   CardContent,
@@ -19,51 +21,58 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Player {
-  id: number;
-  name: string;
-  score: number;
-  rank: number;
-  avatar: string;
+  username: string;
+  points: number;
+  rank?: number;
 }
 
 const LeaderboardPage = () => {
-  const [players, setPlayers] = useState<Player[]>([
-    {
-      id: 1,
-      name: "علی محمدی",
-      score: 1200,
-      rank: 1,
-      avatar: "/avatars/ali.jpg",
-    },
-    {
-      id: 2,
-      name: "مریم احمدی",
-      score: 1150,
-      rank: 2,
-      avatar: "/avatars/maryam.jpg",
-    },
-    {
-      id: 3,
-      name: "رضا کریمی",
-      score: 1100,
-      rank: 3,
-      avatar: "/avatars/reza.jpg",
-    },
-    {
-      id: 4,
-      name: "زهرا حسینی",
-      score: 1050,
-      rank: 4,
-      avatar: "/avatars/zahra.jpg",
-    },
-    {
-      id: 5,
-      name: "محمد رضایی",
-      score: 1000,
-      rank: 5,
-      avatar: "/avatars/mohammad.jpg",
-    },
-  ]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const leaderboardData = await apiClient.getLeaderboard(token!);
+        // Add rank to each player based on their position in the array
+        const rankedPlayers = leaderboardData.map(
+          (player: any, index: any) => ({
+            ...player,
+            rank: index + 1,
+          })
+        );
+        setPlayers(rankedPlayers);
+      } catch (err) {
+        setError("خطا در دریافت جدول امتیازات");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchLeaderboard();
+    }
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-center">در حال بارگذاری...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-center text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -87,18 +96,19 @@ const LeaderboardPage = () => {
             </TableHeader>
             <TableBody>
               {players.map((player) => (
-                <TableRow key={player.id}>
+                <TableRow key={player.username}>
                   <TableCell className="font-medium">{player.rank}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Avatar className="h-8 w-8 mr-2">
-                        <AvatarImage src={player.avatar} alt={player.name} />
-                        <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>
+                          {player.username.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
-                      {player.name}
+                      {player.username}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">{player.score}</TableCell>
+                  <TableCell className="text-right">{player.points}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
