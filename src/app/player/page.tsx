@@ -94,6 +94,30 @@ export default function PlayerDashboard() {
             </Link>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>کاربران</CardTitle>
+            <CardDescription>مشاهده و دنبال کردن کاربران دیگر</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/users">
+              <Button className="w-full">مشاهده کاربران</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>پروفایل کاربری</CardTitle>
+            <CardDescription>مشاهده و مدیریت اطلاعات حساب کاربری</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/profile">
+              <Button className="w-full">مشاهده پروفایل</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

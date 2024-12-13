@@ -144,7 +144,11 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async updateCategory(token: string, categoryId: string, data: { name: string }) {
+  async updateCategory(
+    token: string,
+    categoryId: string,
+    data: { name: string }
+  ) {
     const response = await fetch(`/api/designer/categories/${categoryId}`, {
       method: "PUT",
       headers: {
@@ -240,7 +244,10 @@ export const apiClient = {
   async followDesigner(token: string, designerId: string) {
     const response = await fetch(`/api/player/follow/designer/${designerId}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json" 
+      }
     });
     return handleResponse(response);
   },
@@ -248,21 +255,46 @@ export const apiClient = {
   async followPlayer(token: string, playerId: string) {
     const response = await fetch(`/api/player/follow/player/${playerId}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json" 
+      }
+    });
+    return handleResponse(response);
+  },
+
+  async unfollowDesigner(token: string, designerId: string) {
+    const response = await fetch(`/api/player/unfollow/designer/${designerId}`, {
+      method: "POST",
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json" 
+      }
+    });
+    return handleResponse(response);
+  },
+
+  async unfollowPlayer(token: string, playerId: string) {
+    const response = await fetch(`/api/player/unfollow/player/${playerId}`, {
+      method: "POST",
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json" 
+      }
     });
     return handleResponse(response);
   },
 
   async getFollowing(token: string) {
     const response = await fetch("/api/users/following", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     });
     return handleResponse(response);
   },
 
   async getFollowers(token: string) {
     const response = await fetch("/api/users/followers", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     });
     return handleResponse(response);
   },
@@ -309,6 +341,20 @@ export const apiClient = {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
+    return handleResponse(response);
+  },
+
+  async getAllUsers(token: string) {
+    const response = await fetch("/api/users", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async getUserStats(token: string) {
+    const response = await fetch("/api/users/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return handleResponse(response);
   },
 };

@@ -37,6 +37,19 @@ export default function DesignerDashboard() {
             </Link>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>پروفایل کاربری</CardTitle>
+            <CardDescription>
+              مشاهده و مدیریت اطلاعات حساب کاربری
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/profile">
+              <Button className="w-full">مشاهده پروفایل</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
