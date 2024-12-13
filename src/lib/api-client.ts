@@ -132,26 +132,26 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async createCategory(token: string, name: string) {
+  async createCategory(token: string, data: { name: string }) {
     const response = await fetch("/api/designer/categories", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(data),
     });
     return handleResponse(response);
   },
 
-  async updateCategory(token: string, categoryId: string, name: string) {
+  async updateCategory(token: string, categoryId: string, data: { name: string }) {
     const response = await fetch(`/api/designer/categories/${categoryId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(data),
     });
     return handleResponse(response);
   },

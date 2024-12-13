@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -22,27 +24,104 @@ import {
 } from "@/components/ui/table";
 
 interface Category {
-  id: number;
+  _id: string;
   name: string;
 }
 
 export default function CategoryManagement() {
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: "عمومی" },
-    { id: 2, name: "تخصصی" },
-  ]);
-
+  const { token } = useAuth();
+  const { toast } = useToast();
+  const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  const handleAddCategory = () => {
-    if (newCategory.trim()) {
-      setCategories([
-        ...categories,
-        { id: categories.length + 1, name: newCategory },
-      ]);
-      setNewCategory("");
+  useEffect(() => {
+    if (token) {
+      loadCategories();
+    }
+  }, [token]);
+
+  const loadCategories = async () => {
+    try {
+      const data = await apiClient.getCategories(token!);
+      setCategories(data);
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در بارگذاری دسته‌بندی‌ها",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) {
+      toast({
+        title: "خطا",
+        description: "نام دسته‌بندی نمی‌تواند خالی باشد",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await apiClient.createCategory(token!, { name: newCategory.trim() });
+      toast({
+        title: "موفق",
+        description: "دسته‌بندی با موفقیت اضافه شد",
+      });
+      await loadCategories();
+      setNewCategory("");
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در ایجاد دسته‌بندی",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateCategory = async (category: Category) => {
+    try {
+      await apiClient.updateCategory(token!, category._id, { name: category.name });
+      toast({
+        title: "موفق",
+        description: "دسته‌بندی با موفقیت بروزرسانی شد",
+      });
+      await loadCategories();
+      setEditingCategory(null);
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در بروزرسانی دسته‌بندی",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    try {
+      await apiClient.deleteCategory(token!, id);
+      toast({
+        title: "موفق",
+        description: "دسته‌بندی با موفقیت حذف شد",
+      });
+      await loadCategories();
+    } catch (error) {
+      toast({
+        title: "خطا",
+        description: "خطا در حذف دسته‌بندی",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (loading) {
+    return <div>در حال بارگذاری...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -84,15 +163,60 @@ export default function CategoryManagement() {
             </TableHeader>
             <TableBody>
               {categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell>{category.name}</TableCell>
+                <TableRow key={category._id}>
                   <TableCell>
-                    <Button variant="outline" size="sm" className="mr-2">
-                      ویرایش
-                    </Button>
-                    <Button variant="destructive" size="sm">
-                      حذف
-                    </Button>
+                    {editingCategory?._id === category._id ? (
+                      <Input
+                        value={editingCategory.name}
+                        onChange={(e) =>
+                          setEditingCategory({
+                            ...editingCategory,
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      category.name
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingCategory?._id === category._id ? (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="mr-2"
+                          onClick={() => handleUpdateCategory(editingCategory)}
+                        >
+                          ذخیره
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingCategory(null)}
+                        >
+                          انصراف
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="mr-2"
+                          onClick={() => setEditingCategory(category)}
+                        >
+                          ویرایش
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteCategory(category._id)}
+                        >
+                          حذف
+                        </Button>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
