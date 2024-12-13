@@ -273,4 +273,42 @@ export const apiClient = {
     });
     return handleResponse(response);
   },
+
+  // Designer endpoints updates
+  async getQuestionById(token: string, id: string): Promise<Question> {
+    const response = await fetch(`/api/designer/questions/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async addRelatedQuestion(
+    token: string,
+    questionId: string,
+    relatedId: string
+  ) {
+    const response = await fetch(
+      `/api/designer/questions/${questionId}/related/${relatedId}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return handleResponse(response);
+  },
+
+  async removeRelatedQuestion(
+    token: string,
+    questionId: string,
+    relatedId: string
+  ) {
+    const response = await fetch(
+      `/api/designer/questions/${questionId}/related/${relatedId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return handleResponse(response);
+  },
 };
