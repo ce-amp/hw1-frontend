@@ -317,3 +317,82 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Radix UI for accessible primitives
 - Next.js team for the amazing framework
 - The open-source community for various tools and libraries
+
+## Docker Setup
+
+### Prerequisites
+
+- Docker installed on your machine
+- Docker Compose installed on your machine
+
+### Docker Configuration
+
+The project includes the following Docker configuration files:
+
+- `Dockerfile`: Multi-stage build configuration for optimized production image
+- `docker-compose.yml`: Docker Compose configuration for easy development and deployment
+- `.dockerignore`: Specifies which files should be excluded from the Docker build
+
+### Running with Docker
+
+1. **Build and Start the Application**
+
+   ```bash
+   docker compose up --build
+   ```
+
+   This command will:
+
+   - Build the Docker image using the multi-stage Dockerfile
+   - Start the container with the Next.js application
+   - Map port 3000 to your host machine
+   - The application will be available at http://localhost:3000
+
+2. **Stop the Application**
+
+   ```bash
+   docker compose down
+   ```
+
+3. **View Logs**
+   ```bash
+   docker compose logs -f
+   ```
+
+### Docker Development Features
+
+- **Hot Reload**: The development server supports hot reloading through volume mounts
+- **Production Optimization**: Multi-stage build process for smaller production images
+- **Environment Variables**: Easily configurable through docker-compose.yml
+- **Persistent Volumes**: Node modules and Next.js build cache are persisted
+- **Automatic Restart**: Container automatically restarts on crashes
+
+### Docker Production Deployment
+
+For production deployment, the Docker image is optimized with:
+
+- Multi-stage build process
+- Minimal production dependencies
+- Standalone output configuration
+- Environment-specific optimizations
+
+### Docker Environment Variables
+
+The following environment variables can be configured in docker-compose.yml:
+
+```yaml
+environment:
+  - NODE_ENV=production
+  - PORT=3000
+```
+
+### Docker Volume Mounts
+
+The following volumes are configured for development:
+
+```yaml
+volumes:
+  - .:/app # Project files
+  - /app/node_modules # Node modules
+  - /app/.next # Next.js build
+```

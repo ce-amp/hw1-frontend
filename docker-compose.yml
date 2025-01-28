@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   frontend:
     build:
@@ -7,10 +5,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
     volumes:
       - .:/app
       - /app/node_modules
       - /app/.next
-    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+    networks:
+      - quiz-network
+    restart: always
+
+networks:
+  quiz-network:
+    name: quiz-network
+    driver: bridge
