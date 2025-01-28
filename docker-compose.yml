@@ -12,10 +12,9 @@ services:
     environment:
       - NODE_ENV=development
     networks:
-      - quiz-network
+      - backendspringboot_quiz-network
     restart: always
 
 networks:
-  quiz-network:
-    name: quiz-network
-    driver: bridge
+  backendspringboot_quiz-network:
+    external: true
