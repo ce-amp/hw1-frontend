@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { apiClient } from "@/lib/api-client";
 import {
@@ -41,13 +41,7 @@ export default function ProfilePage() {
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (token) {
-      loadData();
-    }
-  }, [token]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [followersData, followingData, statsData] = await Promise.all([
         apiClient.getFollowers(token!),
@@ -62,7 +56,13 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      loadData();
+    }
+  }, [token, loadData]);
 
   if (loading) {
     return <div>در حال بارگذاری...</div>;

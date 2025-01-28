@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -36,13 +36,7 @@ export default function CategoryManagement() {
   const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  useEffect(() => {
-    if (token) {
-      loadCategories();
-    }
-  }, [token]);
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const data = await apiClient.getCategories(token!);
       setCategories(data);
@@ -55,7 +49,13 @@ export default function CategoryManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, toast]);
+
+  useEffect(() => {
+    if (token) {
+      loadCategories();
+    }
+  }, [token, loadCategories]);
 
   const handleAddCategory = async () => {
     if (!newCategory.trim()) {
@@ -86,7 +86,9 @@ export default function CategoryManagement() {
 
   const handleUpdateCategory = async (category: Category) => {
     try {
-      await apiClient.updateCategory(token!, category._id, { name: category.name });
+      await apiClient.updateCategory(token!, category._id, {
+        name: category.name,
+      });
       toast({
         title: "موفق",
         description: "دسته‌بندی با موفقیت بروزرسانی شد",

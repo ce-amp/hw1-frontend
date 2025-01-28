@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 
 interface User {
-  _id: string;
+  id: string;
   username: string;
   role: "designer" | "player";
 }
@@ -35,14 +35,7 @@ export default function UsersPage() {
   const [following, setFollowing] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (token) {
-      loadUsers();
-      loadFollowing();
-    }
-  }, [token]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const response = await apiClient.getAllUsers(token!);
       console.log("Users response:", response);
@@ -52,7 +45,7 @@ export default function UsersPage() {
       }
 
       const filteredUsers = response.filter(
-        (user: User) => user._id !== currentUser?._id
+        (user: User) => currentUser && user.id !== currentUser.id
       );
       setUsers(filteredUsers);
     } catch (error) {
@@ -66,16 +59,23 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, currentUser, toast]);
 
-  const loadFollowing = async () => {
+  const loadFollowing = useCallback(async () => {
     try {
       const followingData = await apiClient.getFollowing(token!);
-      setFollowing(followingData.map((f: any) => f._id));
+      setFollowing(followingData.map((f: any) => f.id));
     } catch (error) {
       console.error("Error loading following:", error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      loadUsers();
+      loadFollowing();
+    }
+  }, [token, loadUsers, loadFollowing]);
 
   const handleFollowAction = async (
     userId: string,
@@ -104,7 +104,7 @@ export default function UsersPage() {
 
       // Reload following list after action
       const followingData = await apiClient.getFollowing(token);
-      setFollowing(followingData.map((f: any) => f._id));
+      setFollowing(followingData.map((f: any) => f.id));
 
       toast({
         title: "موفق",
@@ -157,7 +157,7 @@ export default function UsersPage() {
                 </TableRow>
               ) : (
                 users.map((user) => (
-                  <TableRow key={user._id}>
+                  <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Avatar>
@@ -174,18 +174,18 @@ export default function UsersPage() {
                     <TableCell>
                       <Button
                         variant={
-                          following.includes(user._id) ? "outline" : "default"
+                          following.includes(user.id) ? "outline" : "default"
                         }
                         size="sm"
                         onClick={() =>
                           handleFollowAction(
-                            user._id,
+                            user.id,
                             user.role,
-                            following.includes(user._id)
+                            following.includes(user.id)
                           )
                         }
                       >
-                        {following.includes(user._id)
+                        {following.includes(user.id)
                           ? "لغو دنبال کردن"
                           : "دنبال کردن"}
                       </Button>

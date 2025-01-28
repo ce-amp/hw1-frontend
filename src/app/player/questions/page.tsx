@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,15 @@ interface Question {
   createdAt?: string;
 }
 
-export default function PlayerQuestions() {
+export default function QuestionsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <QuestionsContent />
+    </Suspense>
+  );
+}
+
+function QuestionsContent() {
   const { token } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,7 +52,7 @@ export default function PlayerQuestions() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadQuestions = async () => {
+  const loadQuestions = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -71,13 +79,13 @@ export default function PlayerQuestions() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, mode, difficulty]);
 
   useEffect(() => {
     if (token && (mode === "random" || difficulty)) {
       loadQuestions();
     }
-  }, [token, mode, difficulty]);
+  }, [token, mode, difficulty, loadQuestions]);
 
   const handleSubmitAnswer = async () => {
     if (!questions[currentQuestionIndex] || selectedAnswer === -1) return;

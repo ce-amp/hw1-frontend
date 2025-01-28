@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { apiClient } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -66,15 +66,7 @@ export default function QuestionManagement() {
   const [newQuestion, setNewQuestion] =
     useState<Omit<Question, "_id">>(emptyQuestion);
 
-  // Load questions and categories
-  useEffect(() => {
-    if (token) {
-      loadQuestions();
-      loadCategories();
-    }
-  }, [token]);
-
-  const loadQuestions = async () => {
+  const loadQuestions = useCallback(async () => {
     try {
       const data = await apiClient.getQuestions(token!);
       setQuestions(data);
@@ -87,20 +79,28 @@ export default function QuestionManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, toast]);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const data = await apiClient.getCategories(token!);
       setCategories(data);
     } catch (error) {
       toast({
         title: "خطا",
-        description: "خطا در بارگذاری دست��‌بندی‌ها",
+        description: "خطا در بارگذاری دسته‌بندی‌ها",
         variant: "destructive",
       });
     }
-  };
+  }, [token, toast]);
+
+  // Load questions and categories
+  useEffect(() => {
+    if (token) {
+      loadQuestions();
+      loadCategories();
+    }
+  }, [token, loadQuestions, loadCategories]);
 
   const handleAddQuestion = async (formData: Omit<Question, "_id">) => {
     try {
@@ -142,7 +142,7 @@ export default function QuestionManagement() {
       await apiClient.updateQuestion(token!, formData._id, questionData);
       toast({
         title: "موفق",
-        description: "سوال با موفقیت بروزرسانی ��د",
+        description: "سوال با موفقیت بروزرسانی شد",
       });
 
       await loadQuestions();
